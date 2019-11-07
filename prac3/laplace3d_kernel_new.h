@@ -1,6 +1,7 @@
 //
 // Notes: one thread per node in the 3D block
 //
+#include <device_launch_parameters.h>
 
 // device code
 

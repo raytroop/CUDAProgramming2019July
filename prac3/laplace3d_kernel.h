@@ -2,6 +2,7 @@
 // Notes:one thread per node in the 2D block;
 // after initialisation it marches in the k-direction
 //
+#include <device_launch_parameters.h>
 
 // device code
 

@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 //
 // kernel routine
@@ -16,6 +18,8 @@ __global__ void my_first_kernel(float *x)
   int tid = threadIdx.x + blockDim.x*blockIdx.x;
 
   x[tid] = (float) threadIdx.x;
+
+  printf("kernel inside tid =  %d\n", tid);
 }
 
 

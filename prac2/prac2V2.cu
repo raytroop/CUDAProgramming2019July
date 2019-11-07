@@ -34,10 +34,10 @@ __global__ void pathcalc(float *d_z, float *d_v)
   // move array pointers to correct position
 
   // version 1
-  ind = threadIdx.x + 2*N*blockIdx.x*blockDim.x;
+  // ind = threadIdx.x + 2*N*blockIdx.x*blockDim.x;
 
   // version 2
-  // ind = 2*N*threadIdx.x + 2*N*blockIdx.x*blockDim.x;
+  ind = 2*N*threadIdx.x + 2*N*blockIdx.x*blockDim.x;
 
 
   // path calculation
@@ -48,15 +48,15 @@ __global__ void pathcalc(float *d_z, float *d_v)
   for (int n=0; n<N; n++) {
     y1   = d_z[ind];
     // version 1
-    ind += blockDim.x;      // shift pointer to next element
+    // ind += blockDim.x;      // shift pointer to next element
     // version 2
-    // ind += 1;
+    ind += 1;
 
     y2   = rho*y1 + alpha*d_z[ind];
     // version 1
-    ind += blockDim.x;      // shift pointer to next element
+    // ind += blockDim.x;      // shift pointer to next element
     // version 2
-    // ind += 1;
+    ind += 1;
 
     s1 = s1*(con1 + con2*y1);
     s2 = s2*(con1 + con2*y2);

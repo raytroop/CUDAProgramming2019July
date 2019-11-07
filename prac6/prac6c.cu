@@ -6,10 +6,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 //
 // template kernel routine
-// 
+//
 
 template <int size>
 __global__ void my_first_kernel(float *x)
@@ -42,7 +44,7 @@ extern
 int prac6(int nblocks, int nthreads)
 {
   float *h_x, *d_x;
-  int   nsize, n; 
+  int   nsize, n;
 
   // allocate memory for arrays
 
@@ -63,7 +65,7 @@ int prac6(int nblocks, int nthreads)
   cudaMemcpy(h_x,d_x,nsize*sizeof(int),cudaMemcpyDeviceToHost);
   for (n=0; n<nsize; n++) printf(" n,  i  =  %d  %g \n",n,h_x[n]);
 
-  // free memory 
+  // free memory
 
   cudaFree(d_x);
   free(h_x);
@@ -71,4 +73,4 @@ int prac6(int nblocks, int nthreads)
   return 0;
 }
 
- 
+

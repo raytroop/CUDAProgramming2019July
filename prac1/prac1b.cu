@@ -8,11 +8,12 @@
 #include <math.h>
 
 #include <helper_cuda.h>
-
+#include <cuda_runtime.h>
+#include <device_launch_parameters.h>
 
 //
 // kernel routine
-// 
+//
 
 __global__ void my_first_kernel(float *x)
 {
@@ -29,7 +30,7 @@ __global__ void my_first_kernel(float *x)
 int main(int argc, const char **argv)
 {
   float *h_x, *d_x;
-  int   nblocks, nthreads, nsize, n; 
+  int   nblocks, nthreads, nsize, n;
 
   // initialise card
 
@@ -47,7 +48,7 @@ int main(int argc, const char **argv)
   checkCudaErrors(cudaMalloc((void **)&d_x, nsize*sizeof(float)));
 
   // execute kernel
-  
+
   my_first_kernel<<<nblocks,nthreads>>>(d_x);
   getLastCudaError("my_first_kernel execution failed\n");
 
@@ -58,7 +59,7 @@ int main(int argc, const char **argv)
 
   for (n=0; n<nsize; n++) printf(" n,  x  =  %d  %f \n",n,h_x[n]);
 
-  // free memory 
+  // free memory
 
   checkCudaErrors(cudaFree(d_x));
   free(h_x);

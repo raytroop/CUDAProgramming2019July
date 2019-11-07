@@ -10,6 +10,7 @@
 #include <device_launch_parameters.h>
 #include <helper_cuda.h>
 
+__device__ float d_sum = 0;
 ////////////////////////////////////////////////////////////////////////////////
 // CPU routines
 ////////////////////////////////////////////////////////////////////////////////
@@ -24,7 +25,7 @@ void reduction_gold(float* odata, float* idata, const unsigned int len)
 // GPU routines
 ////////////////////////////////////////////////////////////////////////////////
 
-__global__ void reduction(float *g_odata, float *g_idata)
+__global__ void reduction(float *g_idata)
 {
     // dynamically allocated shared memory
 
@@ -34,7 +35,7 @@ __global__ void reduction(float *g_odata, float *g_idata)
 
     // first, each thread loads data into shared memory
 
-    temp[tid] = g_idata[tid];
+    temp[tid] = g_idata[tid + blockDim.x * blockIdx.x];
 
     // next, we perform binary tree reduction
 
@@ -45,7 +46,7 @@ __global__ void reduction(float *g_odata, float *g_idata)
 
     // finally, first thread puts result into global memory
 
-    if (tid==0) g_odata[0] = temp[0];
+    if (tid==0)  atomicAdd(&d_sum,temp[0]);
 }
 
 
@@ -85,7 +86,6 @@ int main( int argc, const char** argv)
   // allocate device memory input and output arrays
 
   checkCudaErrors( cudaMalloc((void**)&d_idata, mem_size) );
-  checkCudaErrors( cudaMalloc((void**)&d_odata, sizeof(float)) );
 
   // copy host memory to device input array
 
@@ -95,16 +95,14 @@ int main( int argc, const char** argv)
   // execute the kernel
 
   shared_mem_size = sizeof(float) * num_elements;
-  reduction<<<1,num_threads,shared_mem_size>>>(d_odata,d_idata);
+  reduction<<<1,num_threads,shared_mem_size>>>(d_idata);
   getLastCudaError("reduction kernel execution failed");
 
   // copy result from device to host
 
-  checkCudaErrors( cudaMemcpy(h_data, d_odata, sizeof(float),
-                              cudaMemcpyDeviceToHost) );
+  checkCudaErrors(cudaMemcpyFromSymbol(&h_data[0], d_sum, sizeof(float)));
 
   // check results
-
   printf("reduction error = %f\n",h_data[0]-sum);
 
   // cleanup memory
@@ -112,7 +110,6 @@ int main( int argc, const char** argv)
   free(h_data);
   free(reference);
   checkCudaErrors( cudaFree(d_idata) );
-  checkCudaErrors( cudaFree(d_odata) );
 
   // CUDA exit -- needed to flush printf write buffer
 
